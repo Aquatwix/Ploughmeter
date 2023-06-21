@@ -11,20 +11,21 @@
 */
 
 #include "Ploughmeter.h"
-#include <Wire.h>
 
 // ————— DEEP SLEEP —————————————————————————————
-#define TIME_TO_SLEEP 5 // Time to sleep in seconds
+#define TIME_TO_SLEEP 2 // Time to sleep in seconds
 
 Ploughmeter ploughmeter;
+SoftwareSerial rfSerial(RX_PIN, TX_PIN);
 
 void setup() 
 {
   // Start wire communication
   Wire.begin();
 
-  // Start serial communication at a speed of 115200 baud.
-  Serial.begin(115200);
+  Serial.begin(115200);     // Start serial communication at a speed of 115200 baud.
+  rfSerial.begin(19200);  // Start RF communication at a baud rate of 19200.
+  delay(2700); // Add a delay to allow time for the RF module to initialize properly.
 
   /* Initialisation */
   ploughmeter.init();
@@ -32,14 +33,29 @@ void setup()
   /* Get temperature sensor data */
   ploughmeter.getMAX31865();
 
+  /* Get tilt from inclinometer  */
+  ploughmeter.getSCL3300();
+
   /* Get IMU data */
   ploughmeter.getICM20948();
 
   /* Get abs pressure sensor data */
-  ploughmeter.getPAA20D();
+  ploughmeter.getPAA20D_1();
+
+  /* Get abs pressure sensor data */
+  ploughmeter.getPAA20D_2();
+
+  /* Get pressure sensor data */
+  ploughmeter.getPAA9LD();
+
+  /* Get diff pressure sensor data */
+  ploughmeter.getPD10LX();
 
   /* Get strain gages data */
   ploughmeter.getNAU7802();
+
+  /* Send data through RF */
+  ploughmeter.sendSensorData(rfSerial);
 
   /* debug */
   ploughmeter.display();
