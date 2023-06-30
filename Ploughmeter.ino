@@ -13,7 +13,7 @@
 #include "Ploughmeter.h"
 
 // ————— DEEP SLEEP —————————————————————————————
-#define TIME_TO_SLEEP 2 // Time to sleep in seconds
+#define TIME_TO_SLEEP 0.5 // Time to sleep in seconds
 
 Ploughmeter ploughmeter;
 SoftwareSerial rfSerial(RX_PIN, TX_PIN);

@@ -51,10 +51,6 @@ void Ploughmeter::init()
     // Initialisation of the NAU7802 sensor [I2C-5]
     this->selectI2Cbus(TCA9548A_BUS_NAU7802);
     this->state_NAU7802 = this->_NAU7802.begin();
-    this->_NAU7802.clearBit(NAU7802_PGA_PWR_PGA_CAP_EN, NAU7802_PGA_PWR); //Disable 330pF decoupling on chan 2 (cut the trace)
-    this->_NAU7802.setLDO(NAU7802_LDO_3V0); //Set the onboard Low - Drop - Out voltage regulator to a given value
-    this->_NAU7802.setSampleRate(NAU7802_SPS_80); //Sample rate can be set to 10, 20, 40, 80, or 320Hz
-    this->_NAU7802.setGain(NAU7802_GAIN_2); //Gain can be set to 1, 2, 4, 8, 16, 32, 64, or 128.
 }
 
 /**
@@ -195,12 +191,21 @@ void Ploughmeter::getPAA9LD()
 void Ploughmeter::getNAU7802()
 {
     if(this->state_NAU7802)                     
-    {                     
+    {                   
         this->selectI2Cbus(TCA9548A_BUS_NAU7802);
+        this->_NAU7802.clearBit(NAU7802_PGA_PWR_PGA_CAP_EN, NAU7802_PGA_PWR); //Disable 330pF decoupling on chan 2 (cut the trace)
+        this->_NAU7802.setLDO(NAU7802_LDO_3V0); //Set the onboard Low - Drop - Out voltage regulator to a given value
+        this->_NAU7802.setSampleRate(NAU7802_SPS_80); //Sample rate can be set to 10, 20, 40, 80, or 320Hz
+        this->_NAU7802.setGain(NAU7802_GAIN_4); //Gain can be set to 1, 2, 4, 8, 16, 32, 64, or 128.
+        this->_NAU7802.calibrateAFE(); //Does an internal calibration. Recommended after power up, gain changes, sample rate changes, or channel changes.
+        delay(100); //Delay needed after calibrateAFE
+
         this->_NAU7802.setChannel(NAU7802_CHANNEL_1);
         delay(100); //Delay needed after channel change
         this->_NAU7802.calibrateAFE(); //Does an internal calibration. Recommended after power up, gain changes, sample rate changes, or channel changes.
         delay(100); //Delay needed after calibrateAFE
+
+        long offset; 
         if (this->_NAU7802.available() == true)
         {
             this->ploughX = this->_NAU7802.getAverage(20);
@@ -210,6 +215,7 @@ void Ploughmeter::getNAU7802()
         delay(100); //Delay needed after channel change
         this->_NAU7802.calibrateAFE(); //Does an internal calibration. Recommended after power up, gain changes, sample rate changes, or channel changes.
         delay(100); //Delay needed after calibrateAFE
+
         if (this->_NAU7802.available() == true)
         {
             this->ploughY = this->_NAU7802.getAverage(20);
@@ -236,8 +242,6 @@ void Ploughmeter::getSCL3300()
             this->tiltX = this->_SCL3300.getTiltLevelOffsetAngleX();
             this->tiltY = this->_SCL3300.getTiltLevelOffsetAngleY();
         }
-        // uint16_t tiltX_Int = tiltX * 100 + 18000;
-        // uint16_t tiltY_Int = tiltY * 100 + 18000;
     }                                                
     else                                            
     {              
@@ -252,14 +256,114 @@ void Ploughmeter::getSCL3300()
 */
 void Ploughmeter::sendSensorData(SoftwareSerial& ss)
 {
-    uint8_t packet[4];
-    packet[0] = sizeof(packet) - 1;         // Nombre d'octets à envoyer
-    packet[1] = 0x08;                       // CI
+    int packet_size = 7; // (Header + Length + CI + DC Code + CRC) = 7
+    int packet_id = 0;
+    
+    if (this->state_MAX31865) packet_size += 2;
+    if (this->state_SCL3300)  packet_size += 4;
+    if (this->state_ICM20948) packet_size += 6;
+    if (this->state_PAA20D_1) packet_size += 4;
+    if (this->state_PAA20D_2) packet_size += 4;
+    if (this->state_PAA9LD)   packet_size += 4;
+    if (this->state_PD10LX)   packet_size += 4;
+    if (this->state_NAU7802)  packet_size += 6;
 
-    packet[2] = this->PD10LX_pressure;    
-    packet[3] = this->PD10LX_temp;                       
+    uint8_t packet[packet_size];
+    packet[packet_id] = sizeof(packet) - 1;     packet_id++;   // Header for the transmission (DO NOT TOUCH)
+    packet[packet_id] = 0x08;                   packet_id++;   // Header for the transmission (DO NOT TOUCH)
+  
+    packet[packet_id] = (packet_size - 2) * 2;  packet_id++;   // Amount of bytes to send (packet_size - 2 to remove header and *2 to get amount of byte. (without this, we'll get amount of pairs of byte))
+    packet[packet_id] = 0x08;                   packet_id++;   // CI
+
+    // Detected code
+    packet[packet_id] = (this->state_MAX31865 << 7) + (this->state_SCL3300 << 6) + (this->state_ICM20948 << 5) 
+                      + (this->state_PAA20D_1 << 4) + (this->state_PAA20D_2 << 3) + (this->state_PAA9LD << 2) 
+                      + (this->state_PD10LX << 1) + this->state_NAU7802; packet_id++;
+    
+    // MAX31865
+    if (this->state_MAX31865)
+    {
+        packet[packet_id] = this->MAX31865_rtd >> 8;    packet_id++;
+        packet[packet_id] = this->MAX31865_rtd & 0xFF;  packet_id++;
+    }
+
+    // SCL3300
+    if (this->state_SCL3300)
+    {
+        packet[packet_id] = int(this->tiltX * 100 + 18000) >> 8;    packet_id++;
+        packet[packet_id] = int(this->tiltX * 100 + 18000) & 0xFF;  packet_id++;
+        packet[packet_id] = int(this->tiltY * 100 + 18000) >> 8;    packet_id++;
+        packet[packet_id] = int(this->tiltY * 100 + 18000) & 0xFF;  packet_id++;
+    }
+
+    // ICM20948
+    if (this->state_ICM20948)
+    {
+        packet[packet_id] = int(this->roll * 100 + 18000) >> 8;     packet_id++;
+        packet[packet_id] = int(this->roll * 100 + 18000) & 0xFF;   packet_id++;
+        packet[packet_id] = int(this->pitch * 100 + 18000) >> 8;    packet_id++;
+        packet[packet_id] = int(this->pitch * 100 + 18000) & 0xFF;  packet_id++;
+        packet[packet_id] = int(this->yaw * 100 + 18000) >> 8;      packet_id++;
+        packet[packet_id] = int(this->yaw * 100 + 18000) & 0xFF;    packet_id++;
+    }
+
+    // PAA20D (1)
+    if (this->state_PAA20D_1)
+    {
+        packet[packet_id] = this->PAA20D_1.P >> 8;    packet_id++;
+        packet[packet_id] = this->PAA20D_1.P & 0xFF;  packet_id++;
+        packet[packet_id] = this->PAA20D_1.T >> 8;    packet_id++;
+        packet[packet_id] = this->PAA20D_1.T & 0xFF;  packet_id++;
+    }
+
+    // PAA20D (2)
+    if (this->state_PAA20D_2)
+    {
+        packet[packet_id] = this->PAA20D_2.P >> 8;    packet_id++;
+        packet[packet_id] = this->PAA20D_2.P & 0xFF;  packet_id++;
+        packet[packet_id] = this->PAA20D_2.T >> 8;    packet_id++;
+        packet[packet_id] = this->PAA20D_2.T & 0xFF;  packet_id++;
+    }
+
+    // PAA9D
+    if (this->state_PAA9LD)
+    {
+        packet[packet_id] = this->PAA9LD.P >> 8;      packet_id++;
+        packet[packet_id] = this->PAA9LD.P & 0xFF;    packet_id++;
+        packet[packet_id] = this->PAA9LD.T >> 8;      packet_id++;
+        packet[packet_id] = this->PAA9LD.T & 0xFF;    packet_id++;
+    }
+
+    // PD-10LX
+    if (this->state_PD10LX)
+    {
+        packet[packet_id] = int(this->PD10LX_pressure * 10000 + 10000) >> 8;     packet_id++;
+        packet[packet_id] = int(this->PD10LX_pressure * 10000 + 10000) & 0xFF;   packet_id++;
+        packet[packet_id] = int(this->PD10LX_temp * 100 + 30000) >> 8;           packet_id++;
+        packet[packet_id] = int(this->PD10LX_temp * 100 + 30000) & 0xFF;         packet_id++;
+    }
+
+    // NAU7802
+    if (this->state_NAU7802)
+    {
+        packet[packet_id] = 0x12;   packet_id++;
+        packet[packet_id] = 0x34;   packet_id++;
+        packet[packet_id] = 0x56;   packet_id++;
+        packet[packet_id] = 0x78;   packet_id++;
+        packet[packet_id] = 0x9A;   packet_id++;
+        packet[packet_id] = 0xBC;   packet_id++;
+    }
+
+    // Warning : the packet was initialised with : required bytes (header + length + ci + dc code + crc = 7)
+    // CRC bytes are not initialized yet that mean that the two last bytes = 0x0
+    // So the CRC is set up with : Bytes for header + Byte for length + Byte for CI + Byte for DC Code + 0x0 + 0x0
+    uint16_t crc = this->generate_crc16(packet, sizeof(packet)); 
+    packet[packet_id] = crc >> 8;     packet_id++;
+    packet[packet_id] = crc & 0xFF;   packet_id++;
+    
     ss.write(packet, sizeof(packet));
 }
+
 
 /**
  * @name display()
@@ -343,4 +447,23 @@ void Ploughmeter::selectI2Cbus(uint8_t bus)
   Wire.beginTransmission(TCA9548A_DEFAULT);  // TCA9548A address
   Wire.write(1 << bus);          // send byte to select bus
   Wire.endTransmission();
+}
+
+/**
+ * 
+*/
+uint16_t Ploughmeter::generate_crc16(uint8_t *data, size_t length) 
+{
+  uint16_t crc = 0xFFFF;
+  for (size_t i = 0; i < length; i++) {
+    crc ^= data[i] << 8;
+    for (int j = 0; j < 8; j++) {
+      if (crc & 0x8000) {
+        crc = (crc << 1) ^ 0x1021;
+      } else {
+        crc <<= 1;
+      }
+    }
+  }
+  return crc & 0xFFFF;
 }

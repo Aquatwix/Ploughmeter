@@ -101,10 +101,15 @@ class Ploughmeter
     */
     void sendSensorData(SoftwareSerial &ss);
 
-   /**
-    *
-   */
+    /**
+     *
+    */
     void selectI2Cbus(uint8_t bus);
+
+    /**
+     * 
+    */
+    uint16_t generate_crc16(uint8_t* data, size_t length);
 
     /**
     *
@@ -117,7 +122,7 @@ class Ploughmeter
      * Variables used for MAX31865 sensor
     */
     Adafruit_MAX31865 MAX31865;
-    float MAX31865_rtd;
+    int MAX31865_rtd;
     float MAX31865_ratio;
     float MAX31865_resistance;
     float MAX31865_temp;
