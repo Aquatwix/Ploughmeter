@@ -6,23 +6,7 @@ Ploughmeter_CI = 0x08
 
 # Load dataframes
 dataframes, times = Functions.readDataframe("dataframe.txt")
-
-temperatures = []
-tiltsX = []
-tiltsY = []
-rolls = []
-pitchs = []
-yaws = []
-p1s = []
-t1s = []
-p2s = []
-t2s = []
-p3s = []
-t3s = []
-p4s = []
-t4s = []
-PloughXs = []
-PloughYs = []
+MAX31865_DATAS, SCL3300_DATAS, ICM20948_DATAS, PAA20LD1_DATAS, PAA20LD2_DATAS, PAA9LD_DATAS, PD10LX_DATAS, NAU7802_DATAS = [], [], [], [], [], [], [], []
 
 for dataframe, time in zip(dataframes, times):
 
@@ -37,73 +21,51 @@ for dataframe, time in zip(dataframes, times):
         length = a.loadLength()
         ci = a.loadCI()
         dc_code, state_sensor = a.loadDetectedCode()
+        print(f"Frame : \t0x{a.Sensors_data_int}")
 
         if(state_sensor["MAX31865"]):
             temp = a.getDataFromMAX31865()
-            print(f"MAX31865:\tT: {temp}°C")
-
         if(state_sensor["SCL3300"]):
             tiltX, tiltY = a.getDataFromSCL3300()
-            print(f"SCL3300:\tX: {tiltX}°\tY: {tiltY}°")
-
         if(state_sensor["ICM20948"]):
-            roll, pitch, yaw = a.getDataFromICM20948()
-            print(f"ICM20948:\tR: {roll}°\tP: {pitch}°\tY: {yaw}°")
-
+            roll, pitch, yaw = a.getDataFromICM20948()       
         if(state_sensor["PAA-20LD1"]):
-            p1, t1 = a.getDataFromPAA20LD_1()
-            print(f"PAA-20LD (1):\tP: {p1} bar\tT: {t1}°C")
-
+            p1, t1 = a.getDataFromPAA20LD_1()   
         if(state_sensor["PAA-20LD2"]):
             p2, t2 = a.getDataFromPAA20LD_2()
-            print(f"PAA-20LD (2):\tP: {p2} bar\tT: {t2}°C")
-
         if(state_sensor["PAA-9LD"]):
             p3, t3 = a.getDataFromPAA9LD()
-            print(f"PAA-9LD:\tP: {p3} bar\tT: {t3}°C")
-
         if(state_sensor["PD-10LX"]):
             p4, t4 = a.getDataFromPD10LX()
-            print(f"PD-10LX:\tP: {p4} bar\tT: {t4}°C")
-
         if(state_sensor["NAU7802"]):
             PloughX, PloughY = a.getDataFromNAU7802()
-            print(f"NAU7802:\tX: {PloughX}\tY: {PloughY}")
 
         if(a.CRCisValid()):
-            print("CRC is correct.")
 
             if(state_sensor["MAX31865"]):
-                temperatures.append((temp, time))   
-
+                MAX31865_DATAS.append((temp, time))
+                print(f"MAX31865:\tT: {temp}°C")
             if(state_sensor["SCL3300"]):
-                tiltsX.append((tiltX, time))   
-                tiltsY.append((tiltY, time))   
-
+                SCL3300_DATAS.append((tiltX, tiltY, time))   
+                print(f"SCL3300:\tX: {tiltX}°\tY: {tiltY}°")  
             if(state_sensor["ICM20948"]):
-                rolls.append((roll, time))
-                pitchs.append((pitch, time))
-                yaws.append((yaw, time))
-
+                ICM20948_DATAS.append((roll, pitch, yaw, time))
+                print(f"ICM20948:\tR: {roll}°\tP: {pitch}°\tY: {yaw}°")
             if(state_sensor["PAA-20LD1"]):
-                p1s.append((p1, time))    
-                t1s.append((t1, time))
-
+                PAA20LD1_DATAS.append((p1, t1, time))    
+                print(f"PAA-20LD (1):\tP: {p1} bar\tT: {t1}°C")
             if(state_sensor["PAA-20LD2"]):
-                p2s.append((p2, time))
-                t2s.append((t2, time))
-
+                PAA20LD2_DATAS.append((p2, t2, time))  
+                print(f"PAA-20LD (2):\tP: {p2} bar\tT: {t2}°C")
             if(state_sensor["PAA-9LD"]):
-                p3s.append((p3, time))
-                t3s.append((t3, time))
-
+                PAA9LD_DATAS.append((p3, t3, time))
+                print(f"PAA-9LD:\tP: {p3} bar\tT: {t3}°C")
             if(state_sensor["PD-10LX"]):
-                p4s.append((p4, time))
-                t4s.append((t4, time))    
-
+                PD10LX_DATAS.append((p4, t4, time))
+                print(f"PD-10LX:\tP: {p4} bar\tT: {t4}°C")   
             if(state_sensor["NAU7802"]):
-                PloughXs.append((PloughX, time))   
-                PloughYs.append((PloughY, time))    
+                NAU7802_DATAS.append((PloughX, PloughY, time))   
+                print(f"NAU7802:\tX: {PloughX}\tY: {PloughY}")    
         else:
             print("The CRC calculated with the dataframe does not match with the one received.")
     else:
@@ -112,26 +74,22 @@ for dataframe, time in zip(dataframes, times):
 
 # PLOTS ———————————————————————————————————————————————————————————
 
-Functions.plotData(temperatures, "MAX31865", "Temperature (°C)")
+# Création du plot avec une grille 2x4
+fig, axs = plt.subplots(2, 4, figsize=(16, 8))
+fig.suptitle("Displaying sensors data")
 
-# Functions.plotData(tiltsX, "SCL3300", "TiltX (°)")
-# Functions.plotData(tiltsY, "SCL3300", "TiltY (°)")
+# Appel des fonctions pour tracer les données sur les graphiques
+Functions.plotMAX31865Data(MAX31865_DATAS)
+Functions.plotSCL3300Data(SCL3300_DATAS)
+Functions.plotICM20948Data(ICM20948_DATAS)
+Functions.plotPAA20D1Data(PAA20LD1_DATAS)
+Functions.plotPAA20D2Data(PAA20LD2_DATAS)
+Functions.plotPAA9LDData(PAA9LD_DATAS)
+Functions.plotPD10LXData(PD10LX_DATAS)
+Functions.plotNAU7802Data(NAU7802_DATAS)
 
-# Functions.plotData(rolls, "ICM20948", "Roll (°)")
-# Functions.plotData(pitchs, "ICM20948", "Pitch (°)")
-# Functions.plotData(yaws, "ICM20948", "Yaw (°)")
+# Ajustement des espacements entre les sous-graphiques
+plt.tight_layout()
 
-# Functions.plotData(p1s, "PAA-20LD 1", "Pressure (bar)")
-# Functions.plotData(t1s, "PAA-20LD 1", "Temperature (°C)")
-
-# Functions.plotData(p2s, "PAA-20LD 2", "Pressure (bar)")
-# Functions.plotData(t2s, "PAA-20LD 2", "Temperature (°C)")
-
-# Functions.plotData(p3s, "PAA-9LD", "Pressure (bar)")
-# Functions.plotData(t3s, "PAA-9LD", "Temperature (°C)")
-
-# Functions.plotData(p4s, "PD-10LX", "Pressure (bar)")
-# Functions.plotData(t4s, "PD-10LX", "Temperature (°C)")
-
-# Functions.plotData(p1s, "NAU7802", "PloughX (bar)")
-# Functions.plotData(t1s, "NAU7802", "PloughY (°C)")
+# Affichage du plot
+plt.show()

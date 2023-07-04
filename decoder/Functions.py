@@ -68,14 +68,14 @@ def RTD_to_temp(RTDraw):
 def readDataframe(filename):
 
     path = os.getcwd() + '/decoder/' + filename
-    datas = []
-    times = []
+    datas, rssis, times = [], [], []
     try:
         with open(path, 'r') as file:
             lines = file.readlines()
             for line in lines:
-                data, time = line.strip().split(',')
+                data, rssi, time = line.strip().split('	')
                 datas.append(data)
+                rssis.append(rssi)
                 times.append(time)
     except:
         print(f"Error: the specified file was not found in {path}")
@@ -102,3 +102,141 @@ def plotData(sensor_datas, title, labely):
     # Affichage du graphique
     plt.tight_layout()
     plt.show()
+
+
+
+def plotMAX31865Data(temperatures):
+    timestamps = [datetime.strptime(paire[1], '%d.%m.%Y %H:%M:%S') for paire in temperatures]
+    datas = [paire[0] for paire in temperatures]
+
+    # Création du graphique pour MAX31865
+    plt.subplot(2, 4, 1)
+    plt.plot(timestamps, datas, linestyle='-', color='blue')
+    plt.scatter(timestamps, datas, color='blue', marker='o', s=10)
+    plt.xlabel("Date")
+    plt.ylabel("Temperature (°C)")
+    plt.title("MAX31865")
+    plt.xticks(rotation=45)
+
+
+def plotSCL3300Data(tilts):
+    timestamps = [datetime.strptime(paire[2], '%d.%m.%Y %H:%M:%S') for paire in tilts]
+    tiltX = [paire[0] for paire in tilts]
+    tiltY = [paire[1] for paire in tilts]
+
+    # Création du graphique pour SCL3300
+    plt.subplot(2, 4, 2)
+    plt.plot(timestamps, tiltX, linestyle='-', color='blue', label='TiltX')
+    plt.plot(timestamps, tiltY, linestyle='-', color='red', label='TiltY')
+    plt.scatter(timestamps, tiltX, color='blue', marker='o', s=10)
+    plt.scatter(timestamps, tiltY, color='red', marker='o', s=10)
+    plt.xlabel("Date")
+    plt.ylabel("Angle (°)")
+    plt.title("SCL3300")
+    plt.xticks(rotation=45)
+    plt.legend()
+
+def plotICM20948Data(angles):
+    timestamps = [datetime.strptime(paire[3], '%d.%m.%Y %H:%M:%S') for paire in angles]
+    roll = [paire[0] for paire in angles]
+    pitch = [paire[1] for paire in angles]
+    yaw = [paire[2] for paire in angles]
+
+    # Création du graphique pour ICM20948
+    plt.subplot(2, 4, 3)
+    plt.plot(timestamps, roll, linestyle='-', color='blue', label='Roll')
+    plt.plot(timestamps, pitch, linestyle='-', color='red', label='Pitch')
+    plt.plot(timestamps, yaw, linestyle='-', color='green', label='Yaw')
+    plt.scatter(timestamps, roll, color='blue', marker='o', s=10)
+    plt.scatter(timestamps, pitch, color='red', marker='o', s=10)
+    plt.scatter(timestamps, yaw, color='green', marker='o', s=10)
+    plt.xlabel("Date")
+    plt.ylabel("Angle (°)")
+    plt.title("ICM20948")
+    plt.xticks(rotation=45)
+    plt.legend()
+
+def plotPAA20D1Data(datas):
+    timestamps = [datetime.strptime(paire[2], '%d.%m.%Y %H:%M:%S') for paire in datas]
+    p = [paire[0] for paire in datas]
+    t = [paire[1] for paire in datas]
+
+    # Création du graphique pour PAA20D1
+    plt.subplot(2, 4, 4)
+    plt.plot(timestamps, p, linestyle='-', color='blue', label='Pressure')
+    plt.plot(timestamps, t, linestyle='-', color='red', label='Temperature')
+    plt.scatter(timestamps, p, color='blue', marker='o', s=10)
+    plt.scatter(timestamps, t, color='red', marker='o', s=10)
+    plt.xlabel("Date")
+    plt.ylabel("Bar and °C")
+    plt.title("PAA-20D 1")
+    plt.xticks(rotation=45)
+    plt.legend()
+
+def plotPAA20D2Data(datas):
+    timestamps = [datetime.strptime(paire[2], '%d.%m.%Y %H:%M:%S') for paire in datas]
+    p = [paire[0] for paire in datas]
+    t = [paire[1] for paire in datas]
+
+    # Création du graphique pour PAA20D2
+    plt.subplot(2, 4, 5)
+    plt.plot(timestamps, p, linestyle='-', color='blue', label='Pressure')
+    plt.plot(timestamps, t, linestyle='-', color='red', label='Temperature')
+    plt.scatter(timestamps, p, color='blue', marker='o', s=10)
+    plt.scatter(timestamps, t, color='red', marker='o', s=10)
+    plt.xlabel("Date")
+    plt.ylabel("Bar and °C")
+    plt.title("PAA-20D 2")
+    plt.xticks(rotation=45)
+    plt.legend()
+
+def plotPAA9LDData(datas):
+    timestamps = [datetime.strptime(paire[2], '%d.%m.%Y %H:%M:%S') for paire in datas]
+    p = [paire[0] for paire in datas]
+    t = [paire[1] for paire in datas]
+
+    # Création du graphique pour PAA9LD
+    plt.subplot(2, 4, 6)
+    plt.plot(timestamps, p, linestyle='-', color='blue', label='Pressure')
+    plt.plot(timestamps, t, linestyle='-', color='red', label='Temperature')
+    plt.scatter(timestamps, p, color='blue', marker='o', s=10)
+    plt.scatter(timestamps, t, color='red', marker='o', s=10)
+    plt.xlabel("Date")
+    plt.ylabel("Bar and °C")
+    plt.title("PAA-9LD")
+    plt.xticks(rotation=45)
+    plt.legend()
+
+def plotPD10LXData(datas):
+    timestamps = [datetime.strptime(paire[2], '%d.%m.%Y %H:%M:%S') for paire in datas]
+    p = [paire[0] for paire in datas]
+    t = [paire[1] for paire in datas]
+
+    # Création du graphique pour PD10LX
+    plt.subplot(2, 4, 7)
+    plt.plot(timestamps, p, linestyle='-', color='blue', label='Pressure')
+    plt.plot(timestamps, t, linestyle='-', color='red', label='Temperature')
+    plt.scatter(timestamps, p, color='blue', marker='o', s=10)
+    plt.scatter(timestamps, t, color='red', marker='o', s=10)
+    plt.xlabel("Date")
+    plt.ylabel("Bar and °C")
+    plt.title("PD-10LX")
+    plt.xticks(rotation=45)
+    plt.legend()
+
+def plotNAU7802Data(datas):
+    timestamps = [datetime.strptime(paire[2], '%d.%m.%Y %H:%M:%S') for paire in datas]
+    ploughX = [paire[0] for paire in datas]
+    ploughY = [paire[1] for paire in datas]
+
+    # Création du graphique pour PD10LX
+    plt.subplot(2, 4, 8)
+    plt.plot(timestamps, ploughX, linestyle='-', color='blue', label='PloughX')
+    plt.plot(timestamps, ploughY, linestyle='-', color='red', label='PloughY')
+    plt.scatter(timestamps, ploughX, color='blue', marker='o', s=10)
+    plt.scatter(timestamps, ploughY, color='red', marker='o', s=10)
+    plt.xlabel("Date")
+    plt.ylabel("Value")
+    plt.title("NAU7802")
+    plt.xticks(rotation=45)
+    plt.legend()

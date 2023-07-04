@@ -272,7 +272,7 @@ void Ploughmeter::sendSensorData(SoftwareSerial& ss)
     packet[packet_id] = sizeof(packet) - 1;     packet_id++;   // Header for the transmission (DO NOT TOUCH)
     packet[packet_id] = 0x08;                   packet_id++;   // Header for the transmission (DO NOT TOUCH)
   
-    packet[packet_id] = (packet_size - 2) * 2;  packet_id++;   // Amount of bytes to send (packet_size - 2 to remove header and *2 to get amount of byte. (without this, we'll get amount of pairs of byte))
+    packet[packet_id] = sizeof(packet) - 1;     packet_id++;   // Amount of bytes to send (packet_size - 2 to remove header and *2 to get amount of byte. (without this, we'll get amount of pairs of byte))
     packet[packet_id] = 0x08;                   packet_id++;   // CI
 
     // Detected code
@@ -355,11 +355,35 @@ void Ploughmeter::sendSensorData(SoftwareSerial& ss)
     }
 
     // Warning : the packet was initialised with : required bytes (header + length + ci + dc code + crc = 7)
-    // CRC bytes are not initialized yet that mean that the two last bytes = 0x0
+    // CRC bytes are not initialized yet that mean that the two last bytes are undetermined.
+    // To resolve that, we fix these two last bytes to 0x0
     // So the CRC is set up with : Bytes for header + Byte for length + Byte for CI + Byte for DC Code + 0x0 + 0x0
+
+    int crc_msb_byte = packet_id;
+    int crc_lsb_byte = packet_id + 1;
+    packet[crc_msb_byte] = 0x00;
+    packet[crc_lsb_byte] = 0x00;
+
+    // ss.println();
+    // for(int i = 0; i < sizeof(packet); i++)
+    // {
+    //   ss.print("0x");
+    //   ss.print(packet[i], HEX);
+    //   ss.print(", ");
+    // }
+
     uint16_t crc = this->generate_crc16(packet, sizeof(packet)); 
-    packet[packet_id] = crc >> 8;     packet_id++;
-    packet[packet_id] = crc & 0xFF;   packet_id++;
+    packet[crc_msb_byte] = crc >> 8;     
+    packet[crc_lsb_byte] = crc & 0xFF;  
+
+    // ss.println();
+    // for(int i = 0; i < sizeof(packet); i++)
+    // {
+    //   ss.print("0x");
+    //   ss.print(packet[i], HEX);
+    //   ss.print(", ");
+    // }
+    // ss.println();
     
     ss.write(packet, sizeof(packet));
 }
