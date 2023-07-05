@@ -72,8 +72,8 @@ To use the radio frequency protocol correctly, you need to configure correctly t
 
 Both modems must have the same RF channel, RF data rate, MBUS mode, A-field VER and A-field DEV.
 
-## Step 5: Download the Ploughmeter example onto the map
-- To open the Ploughmeter example: (Arduino IDE > File > Examples > Ploughmeter > Ploughmeter_example)
+## Step 5: Download the Ploughmeter example onto the board
+- To open the Ploughmeter example: (Arduino IDE > File > Examples > Ploughmeter-Library > Ploughmeter_example)
 - You can modify the sleep time by changing the TIME_TO_SLEEP variable.
 
 ## Step 6 : Modems installation
