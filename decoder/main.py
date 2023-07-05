@@ -8,6 +8,7 @@ Ploughmeter_CI = 0x08
 dataframes, times = Functions.readDataframe("dataframe.txt")
 MAX31865_DATAS, SCL3300_DATAS, ICM20948_DATAS, PAA20LD1_DATAS, PAA20LD2_DATAS, PAA9LD_DATAS, PD10LX_DATAS, NAU7802_DATAS = [], [], [], [], [], [], [], []
 
+# Browse the data frame file, retrieving frame, rssi and timestamp line by line.
 for dataframe, time in zip(dataframes, times):
 
     print("——————————————————————————————————————————————————————")
@@ -16,7 +17,7 @@ for dataframe, time in zip(dataframes, times):
     # a.information()
 
     if(a.checkingCI(Ploughmeter_CI)):
-        
+
         a.loadHeader()
         length = a.loadLength()
         ci = a.loadCI()
@@ -40,6 +41,7 @@ for dataframe, time in zip(dataframes, times):
         if(state_sensor["NAU7802"]):
             PloughX, PloughY = a.getDataFromNAU7802()
 
+        # Consider only data that is reliable (with the correct CRC)
         if(a.CRCisValid()):
 
             if(state_sensor["MAX31865"]):
@@ -74,11 +76,11 @@ for dataframe, time in zip(dataframes, times):
 
 # PLOTS ———————————————————————————————————————————————————————————
 
-# Création du plot avec une grille 2x4
+# Create a plot with a 2x4 grid
 fig, axs = plt.subplots(2, 4, figsize=(16, 8))
 fig.suptitle("Displaying sensors data")
 
-# Appel des fonctions pour tracer les données sur les graphiques
+# Call the functions to plot the data on the graphs
 Functions.plotMAX31865Data(MAX31865_DATAS)
 Functions.plotSCL3300Data(SCL3300_DATAS)
 Functions.plotICM20948Data(ICM20948_DATAS)
@@ -88,8 +90,8 @@ Functions.plotPAA9LDData(PAA9LD_DATAS)
 Functions.plotPD10LXData(PD10LX_DATAS)
 Functions.plotNAU7802Data(NAU7802_DATAS)
 
-# Ajustement des espacements entre les sous-graphiques
+# Adjust the spacing between subplots
 plt.tight_layout()
 
-# Affichage du plot
+# Display the plot
 plt.show()

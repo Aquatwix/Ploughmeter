@@ -15,6 +15,9 @@
 #include <TCA9548A.h>                                             // TCA9548A
 #include <SoftwareSerial.h>                                       // RF
 
+// —————— DEEP SLEEP —————————————————————————————
+#define TIME_TO_SLEEP 1  // Time to sleep in seconds
+
 // —————— RF ————————————————————————————————————
 #define RX_PIN   3
 #define TX_PIN   1
@@ -43,76 +46,96 @@ class Ploughmeter
 {
   public:
 
-    // Constructor for Ploughmeter class
+    /* Constructor for Ploughmeter class */
     Ploughmeter();
 
-    /** 
-    * Initializes the registers of the PD10LX sensor
+    /**
+     * @brief Initializes the sensors.
+     * @name init
     */
     void init();
 
     /**
-     * 
+     * @brief Retrieves data from the MAX31865 sensor.
+     * @name getMAX31865
     */
     void getMAX31865();
 
     /**
-     * 
+     * @brief Retrieves data from the ICM20948 sensor.
+     * @name getICM20948
     */
     void getICM20948();
 
     /**
-     * 
+     * @brief Retrieves data from the PAA-20D (1) sensor.
+     * @name getPAA20D_1
     */
     void getPAA20D_1();
 
     /**
-     * 
+     * @brief Retrieves data from the PAA-20D (2) sensor.
+     * @name getPAA20D_2
     */
     void getPAA20D_2();
 
     /**
-     * 
+     * @brief Retrieves data from the PD-10LX sensor.
+     * @name getPD10LX
     */
     void getPD10LX();
 
     /**
-     * 
+     * @brief Retrieves data from the PAA-9LD sensor.
+     * @name getPAA9LD
     */
     void getPAA9LD();
 
-   /**
-    * 
-   */
+    /**
+     * @brief Retrieves data from the NAU7802 sensor.
+     * @name getNAU7802
+    */
     void getNAU7802();
 
     /**
-     * 
+     * @brief Retrieves data from the SCL3300 sensor.
+     * @name getSCL3300
     */
     void getSCL3300();
 
     /**
-     * 
+     * @brief Displays the sensor data on the Serial Monitor.
+     * @name display()
     */
     void display();
 
     /**
-     * 
+     * @brief Sends sensor data over a serial connection.
+     * @name sendSensorData
+     * @param ss The SoftwareSerial object for the serial rf connection.
     */
     void sendSensorData(SoftwareSerial &ss);
 
     /**
-     *
+     * @brief Selects the I2C bus for communication.
+     * @name selectI2Cbus()
+     * @param bus The bus number to select.
     */
     void selectI2Cbus(uint8_t bus);
 
     /**
-     * 
+     * @brief Generates a CRC16 checksum for the given data.
+     * @name generate_crc16()
+     * @param data The data array to calculate the checksum for.
+     * @param length The length of the data array.
+     * @return The calculated CRC16 checksum.
     */
     uint16_t generate_crc16(uint8_t* data, size_t length);
 
     /**
-    *
+     * @brief Puts the device into deep sleep mode for a specified duration.
+     * @name sleep()
+     * @param time_to_sleep The number of seconds to sleep.
     */
     void sleep(float time);
 
@@ -170,15 +193,15 @@ class Ploughmeter
     bool state_PAA9LD = false; 
 
     /**
-     * 
+     * Variables used for Keller NAU7802 sensor
     */     
     NAU7802 _NAU7802;
-    float ploughX;
-    float ploughY;
+    uint32_t ploughX;
+    uint32_t ploughY;
     bool state_NAU7802 = false;
 
     /**
-     *
+     * Variables used for Keller SCL3300 sensor
     */
     SCL3300 _SCL3300;
     float tiltX;
