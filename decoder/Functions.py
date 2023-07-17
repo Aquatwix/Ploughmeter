@@ -83,7 +83,8 @@ def RTD_to_temp(RTDraw):
 def readDataframe(filename):
 
     # Construct the file path
-    path = os.getcwd() + '/decoder/' + filename
+    path = os.getcwd() + '/decoder/' + filename     # Mac environment
+    # path = filename                               # Windows environment
 
     datas, rssis, times = [], [], []
 
@@ -103,7 +104,8 @@ def readDataframe(filename):
                 times.append(time)
 
     except:
-        print(f"Error: the specified file was not found in {path}")
+        print(f"\x1b[31mError: the specified file was not found in {path}\x1b[0m")
+        print("\x1b[31mModify the path to suit your environment: Functions.py > readDataframe function > line 86/87 \x1b[0m")
 
     # Return the extracted lists as a tuple
     return datas, times
