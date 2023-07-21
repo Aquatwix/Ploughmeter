@@ -82,9 +82,11 @@ Both modems must have the same RF channel, RF data rate, MBUS mode, A-field VER 
 The transmitter modem will send the data supplied by the microcontroller. 
 - You must remove the RX/TX jumpers used for configuration.
 - Connect the modem's RX pin to the ESP8266's TX pin.
+- Move the power supply jumper to release the 3.3V pin.
+- Connect the modem's 3,3V pin to the ESP8266's 3,3V pin.
 - Don't forget to connect the grounds.
 
-<img src="https://cdn.discordapp.com/attachments/993554363232559104/1126163998161768538/image.png" width="60%" heigth="60%"/>
+<img src="https://media.discordapp.net/attachments/993554363232559104/1131867365936730112/image.png" width="60%" heigth="60%"/>
 
 ### Receiver modem
 - The receiving modem just needs to be connected to the computer. This means that the jumpers still need to be installed.
