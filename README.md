@@ -32,8 +32,8 @@ The Ploughmeter prototype is a device used for measuring and analyzing data rela
     - <a href="https://github.com/adafruit/Adafruit_MAX31865">MAX31865</a> + PT100
     - <a href="https://github.com/DavidArmstrong/SCL3300">SCL3300</a>
     - <a href="https://github.com/adafruit/Adafruit_ICM20X/tree/master">ICM20948</a>
-    - <a href="https://drive.google.com/drive/folders/101NB1hk6-6I5mgdBa2VgDFpXMAQXd578?usp=sharing">PAA-20D x2</a> <a href="https://github.com/bluerobotics/BlueRobotics_KellerLD_Library">(BlueRobotics Library + local declaration of T)</a>
-    - <a href="https://drive.google.com/drive/folders/101NB1hk6-6I5mgdBa2VgDFpXMAQXd578?usp=sharing">PAA-9LD</a> <a href="https://github.com/bluerobotics/BlueRobotics_KellerLD_Library">(BlueRobotics Library + local declaration of T)</a>
+    - <a href="https://drive.google.com/drive/folders/101NB1hk6-6I5mgdBa2VgDFpXMAQXd578?usp=sharing">PAA-20D x2</a> ( = <a href="https://github.com/bluerobotics/BlueRobotics_KellerLD_Library">BlueRobotics Library</a> + local declaration of T)
+    - <a href="https://drive.google.com/drive/folders/101NB1hk6-6I5mgdBa2VgDFpXMAQXd578?usp=sharing">PAA-9LD</a> ( = <a href="https://github.com/bluerobotics/BlueRobotics_KellerLD_Library">BlueRobotics Library</a> + local declaration of T)
     - <a href="https://github.com/Aquatwix/PD-10LX-Library/tree/main">PD-10LX</a>
     - <a href="https://github.com/sparkfun/SparkFun_Qwiic_Scale_NAU7802_Arduino_Library">NAU7802</a> + Strain gages + Wheatstone
     - <a href="https://github.com/WifWaf/TCA9548A">TCA9548A</a>
