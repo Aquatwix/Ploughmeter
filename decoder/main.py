@@ -5,11 +5,11 @@ from Decoder import Decoder
 Ploughmeter_CI = 0x08
 
 # Load dataframes
-dataframes, times = Functions.readDataframe("dataframe.txt")
-MAX31865_DATAS, SCL3300_DATAS, ICM20948_DATAS, PAA20LD1_DATAS, PAA20LD2_DATAS, PAA9LD_DATAS, PD10LX_DATAS, NAU7802_DATAS = [], [], [], [], [], [], [], []
+dataframes, times, rssis = Functions.readDataframe("dataframe.txt")
+MAX31865_DATAS, SCL3300_DATAS, ICM20948_DATAS, PAA20LD1_DATAS, PAA20LD2_DATAS, PAA9LD_DATAS, PD10LX_DATAS, NAU7802_DATAS, RSSIS = [], [], [], [], [], [], [], [], []
 
 # Browse the data frame file, retrieving frame, rssi and timestamp line by line.
-for dataframe, time in zip(dataframes, times):
+for dataframe, time, rssi in zip(dataframes, times, rssis):
 
     print("——————————————————————————————————————————————————————")
     a = Decoder()
@@ -67,7 +67,8 @@ for dataframe, time in zip(dataframes, times):
                 print(f"PD-10LX:\tP: {p4} bar\tT: {t4}°C")   
             if(state_sensor["NAU7802"]):
                 NAU7802_DATAS.append((PloughX, PloughY, time))   
-                print(f"NAU7802:\tX: {PloughX}\tY: {PloughY}")    
+                print(f"NAU7802:\tX: {PloughX}\tY: {PloughY}") 
+            RSSIS.append((rssi, time))
         else:
             print("The CRC calculated with the dataframe does not match with the one received.")
     else:
@@ -95,3 +96,6 @@ plt.tight_layout()
 
 # Display the plot
 plt.show()
+
+# Plot the RSSI
+Functions.plotRSSI(RSSIS)

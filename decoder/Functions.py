@@ -100,15 +100,15 @@ def readDataframe(filename):
 
                 # Append the values to their respective lists
                 datas.append(data)
-                rssis.append(rssi)
                 times.append(time)
+                rssis.append(rssi)
 
     except:
         print(f"\x1b[31mError: the specified file was not found in {path}\x1b[0m")
         print("\x1b[31mModify the path to suit your environment: Functions.py > readDataframe function > line 86/87 \x1b[0m")
 
     # Return the extracted lists as a tuple
-    return datas, times
+    return datas, times, rssis
 
 
 # @brief Plots sensor data over time.
@@ -159,7 +159,7 @@ def plotMAX31865Data(temperatures):
 # @brief Plots SCL3300 tilt data over time.
 # @name plotSCL3300Data
 # @params
-# - tilts: A list of tuples containing tilt data, timestamps, and axis labels.
+# - tilts: A list of tuples containing tilt data, timestamps.
 def plotSCL3300Data(tilts):
 
     timestamps = [datetime.strptime(paire[2], '%d.%m.%Y %H:%M:%S') for paire in tilts]
@@ -180,7 +180,7 @@ def plotSCL3300Data(tilts):
 # @brief Plots ICM20948 angle data over time.
 # @name plotICM20948Data
 # @params
-# - angles: A list of tuples containing angle data, timestamps, and axis labels.
+# - angles: A list of tuples containing angle data, timestamps.
 def plotICM20948Data(angles):
 
     timestamps = [datetime.strptime(paire[3], '%d.%m.%Y %H:%M:%S') for paire in angles]
@@ -203,7 +203,7 @@ def plotICM20948Data(angles):
 # @brief Plots PAA20D1 sensor data over time.
 # @name plotPAA20D1Data
 # @params
-# - datas: A list of tuples containing PAA20D1 sensor data, timestamps, and axis labels.
+# - datas: A list of tuples containing PAA20D1 sensor data, timestamps.
 def plotPAA20D1Data(datas):
 
     timestamps = [datetime.strptime(paire[2], '%d.%m.%Y %H:%M:%S') for paire in datas]
@@ -224,7 +224,7 @@ def plotPAA20D1Data(datas):
 # @brief Plots PAA20D2 sensor data over time.
 # @name plotPAA20D2Data
 # @params
-# - datas: A list of tuples containing PAA20D2 sensor data, timestamps, and axis labels.
+# - datas: A list of tuples containing PAA20D2 sensor data, timestamps.
 def plotPAA20D2Data(datas):
 
     timestamps = [datetime.strptime(paire[2], '%d.%m.%Y %H:%M:%S') for paire in datas]
@@ -245,7 +245,7 @@ def plotPAA20D2Data(datas):
 # @brief Plots PAA9LD sensor data over time.
 # @name plotPAA9LDData
 # @params
-# - datas: A list of tuples containing PAA9LD sensor data, timestamps, and axis labels.
+# - datas: A list of tuples containing PAA9LD sensor data, timestamps.
 def plotPAA9LDData(datas):
 
     timestamps = [datetime.strptime(paire[2], '%d.%m.%Y %H:%M:%S') for paire in datas]
@@ -266,7 +266,7 @@ def plotPAA9LDData(datas):
 # @brief Plots PD10LX sensor data over time.
 # @name plotPD10LXData
 # @params
-# - datas: A list of tuples containing PD10LX sensor data, timestamps, and axis labels.
+# - datas: A list of tuples containing PD10LX sensor data, timestamps.
 def plotPD10LXData(datas):
 
     timestamps = [datetime.strptime(paire[2], '%d.%m.%Y %H:%M:%S') for paire in datas]
@@ -287,7 +287,7 @@ def plotPD10LXData(datas):
 # @brief Plots NAU7802 sensor data over time.
 # @name plotNAU7802Data
 # @params
-# - datas: A list of tuples containing NAU7802 sensor data, timestamps, and axis labels.
+# - datas: A list of tuples containing NAU7802 sensor data, timestamps.
 def plotNAU7802Data(datas):
 
     timestamps = [datetime.strptime(paire[2], '%d.%m.%Y %H:%M:%S') for paire in datas]
@@ -303,3 +303,23 @@ def plotNAU7802Data(datas):
     plt.title("NAU7802")
     plt.xticks(rotation=45)
     plt.legend()
+
+# @brief Plots RSSI over time.
+# @name plotRSSI
+# @params
+# - rssis: A list of tuples containing RSSI values, timestamps
+def plotRSSI(rssis):
+
+    timestamps = [datetime.strptime(paire[1], '%d.%m.%Y %H:%M:%S') for paire in rssis]
+    rssis = [paire[0] for paire in rssis]
+
+    # Créer le plot
+    plt.plot(timestamps, rssis, marker='o', linestyle='-')
+
+    # Ajouter des titres et étiquettes
+    plt.title('RSSI over time')
+    plt.xlabel('Time (s)')
+    plt.ylabel('RSSI (dBm)')
+
+    # Afficher le plot
+    plt.show()
