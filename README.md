@@ -92,7 +92,7 @@ The transmitter modem will send the data supplied by the microcontroller.
 - The receiving modem just needs to be connected to the computer. This means that the jumpers still need to be installed.
 
 ## Step 7: Data collection with the MBUS-DEMO tool
-If the previous steps have gone smoothly, you're ready to retrieve the datas.
+If the previous steps have gone smoothly, you're ready to retrieve the datas. You can see the orange LED blinking on the sending modem, indicating that data is being sent. The orange LED on the receiving modem should be blinking to indicate that data is being received.
 - Open the MBUS-DEMO tool and select the COM port of your receiving modem.
 - Go to the MBUS Packet Sniffer tool and press the "Start" button. You should see the dataframes arrive.
 <img src="https://cdn.discordapp.com/attachments/993554363232559104/1126157504041189477/image.png"/>
